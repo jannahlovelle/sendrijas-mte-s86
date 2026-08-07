@@ -97,5 +97,54 @@ module.exports.deleteMovie = (req, res) => {
 			message: "Movie deleted successfully"
 		})
 	})
+	.catch(err => errorHandler(err, req, res));
 }
 
+module.exports.addComment = (req, res) => {
+    const newComment = {
+        userId: req.user.id,
+        comment: req.body.comment
+    };
+
+    return Movie.findByIdAndUpdate(
+        req.params.id,
+        {
+            $push: {
+                comments: newComment
+            }
+        },
+        {
+            returnDocument: "after"
+        }
+    )
+    .then(movie => {
+
+        if (!movie) {
+            return res.status(404).send({
+                message: "Movie not found"
+            });
+        }
+
+        return res.status(200).send({
+            message: "comment added successfully",
+            updatedMovie: movie
+        });
+
+    })
+    .catch(err => errorHandler(err, req, res));
+}
+
+module.exports.getComments = (req, res) => {
+	return Movie.findById(req.params.id)
+	.then(movie => {
+		if (!movie) {
+            return res.status(404).send({
+                message: "Movie not found"
+            });
+        }
+
+        return res.status(200).send({
+            comments: movie.comments
+        });
+	})
+}
