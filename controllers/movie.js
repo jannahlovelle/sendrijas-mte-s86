@@ -56,3 +56,46 @@ module.exports.getMovie = (req, res) => {
         });
     });
 }
+
+module.exports.updateMovie = (req, res) => {
+	const updates = {}
+
+	if (req.body.title !== undefined) updates.title = req.body.title;
+	if (req.body.director !== undefined) updates.director = req.body.director;
+	if (req.body.year !== undefined) updates.year = req.body.year;
+	if (req.body.description !== undefined) updates.description = req.body.description;
+	if (req.body.genre !== undefined) updates.genre = req.body.genre;
+
+	return Movie.findByIdAndUpdate(req.params.id, updates, {
+		returnDocument: "after"
+	})
+	.then(movie => {
+		if (!movie){
+			return res.status(404).send({
+				message: "Movie not found"
+			});
+		}
+
+		return res.status(200).send({
+			message: "Movie updated successfully",
+			updatedMovie: movie
+		})
+	})
+	.catch(err => errorHandler(err, req, res));
+}
+
+module.exports.deleteMovie = (req, res) => {
+	return Movie.findByIdAndDelete(req.params.id)
+	.then(movie => {
+		if (!movie){
+			return res.status(404).send({
+				message: "Movie not found"
+			});
+		}
+
+		return res.status(200).send({
+			message: "Movie deleted successfully"
+		})
+	})
+}
+
